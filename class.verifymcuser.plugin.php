@@ -16,7 +16,7 @@
 $PluginInfo['VerifyMCUser'] = array(
 	'Name' => 'Verify Minecraft Username',
 	'Description' => 'Verifies usernames are premium minecraft usernames during registration. A special thanks to gabessdsp at vanillaforums.org for sponsoring this plugin.',
-	'Version' => '1.2',
+	'Version' => '1.3',
 	'RequiredApplications' => array('Vanilla' => '2.0.18.8'),
 	'RequiredTheme' => FALSE,
 	'RequiredPlugins' => FALSE,
@@ -42,7 +42,7 @@ class VerifyMCUser extends Gdn_Plugin {
 	
 	public function PluginController_VerifyMCUser_Create($Sender) {
       $Username = filter_var($Sender->RequestArgs[0], FILTER_SANITIZE_ENCODED);
-      echo file_get_contents('http://minecraft.net/haspaid.jsp?user=' . $Username);
+      echo empty(file_get_contents('https://api.mojang.com/users/profiles/minecraft/' . $Username)) ? false : true;
 	}
 	
     public function EntryController_Register_Handler($Sender) {
@@ -52,7 +52,7 @@ class VerifyMCUser extends Gdn_Plugin {
     public function EntryController_RegisterValidation_Handler($Sender) {
       $FormValues = $Sender->Form->FormValues();
       $Username = $FormValues['Name'];
-      if(file_get_contents('http://minecraft.net/haspaid.jsp?user=' . $Username) == 'false') {
+      if(empty(file_get_contents('https://api.mojang.com/users/profiles/minecraft/' . $Username))) {
         $Sender->Form->AddError('Please enter a valid Minecraft username.');
         $Sender->Render();
         exit();
